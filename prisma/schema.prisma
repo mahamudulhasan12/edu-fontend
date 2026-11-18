@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Subject {
+  id            String   @id
+  title         String
+  bnTitle       String
+  overview      String   @db.Text
+  bnOverview    String   @db.Text
+  department    String
+  semester      Int
+  price         Int
+  driveUrl      String?  @db.Text
+  updatedAt     DateTime @updatedAt
+  courseSubjects CourseSubject[]
+
+  @@index([department, semester])
+}
+
+model Course {
+  id             String   @id
+  title          String
+  bnTitle        String
+  description    String   @db.Text
+  bnDescription  String   @db.Text
+  department     String
+  semester       Int
+  price          Int
+  updatedAt      DateTime @updatedAt
+  subjects       CourseSubject[]
+
+  @@index([department, semester])
+}
+
+model CourseSubject {
+  courseId  String
+  subjectId String
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, subjectId])
+}
+
+model Purchase {
+  id                  String   @id @default(uuid())
+  productType         String
+  productId           String
+  amount              Int
+  currency            String   @default("BDT")
+  invoiceNumber       String   @unique
+  accessKeyHash       String
+  status              String   @default("PENDING")
+  bkashPaymentId      String?  @unique
+  bkashTransactionId  String?
+  createdAt           DateTime @default(now())
+  expiresAt           DateTime
+  paidAt              DateTime?
+
+  @@index([status, createdAt])
+}
